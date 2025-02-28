@@ -43,6 +43,7 @@ const UsersComponent: React.FC = () => {
     ];
 
     const fetchUsers = () => {
+        setLoading(true);
         axios.get(usersUrl)
             .then(response => {
                 setUsers(response.data.users);
