@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
@@ -13,15 +13,14 @@ import DeleteDialog from '../Common/Dialog/DeleteDialog';
 import { DELETE_USER } from '../../constants/messages';
 import { Stack, Typography } from '@mui/material';
 
-const paginationModel = { page: 0, pageSize: 5 };
-
 const UsersComponent: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-
+    const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 5 });
+    const [rowCount, setRowCount] = useState<number>(0);
 
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'ID', flex: 0.1 },
@@ -44,9 +43,13 @@ const UsersComponent: React.FC = () => {
 
     const fetchUsers = () => {
         setLoading(true);
-        axios.get(usersUrl)
+        const {page,pageSize}= paginationModel
+        const skip = page * pageSize;
+        const limit = pageSize;
+        axios.get(`${usersUrl}?skip=${skip}&limit=${limit}`)
             .then(response => {
                 setUsers(response.data.users);
+                setRowCount(response.data.total);
                 setLoading(false);
             }).catch(error => {
                 setError('There was an error fetching the user data!');
@@ -56,7 +59,7 @@ const UsersComponent: React.FC = () => {
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [paginationModel]);
 
     const handleUserCreated = () => {
         fetchUsers(); // Refresh the users list
@@ -88,6 +91,9 @@ const UsersComponent: React.FC = () => {
         setSelectedUserId(selection.length > 0 ? selection[0] : null);
     };
 
+    const handlePaginationChange = (model: GridPaginationModel) => {
+        setPaginationModel(model);
+    };
 
     if (loading) {
         return <CircularProgress />;
@@ -112,8 +118,11 @@ const UsersComponent: React.FC = () => {
                     pageSizeOptions={[5, 10]}
                     checkboxSelection={false}
                     onRowSelectionModelChange={handleRowSelection}
-                    initialState={{ pagination: { paginationModel } }}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={handlePaginationChange}
                     sx={{ border: 0 }}
+                    rowCount={rowCount}
+                    paginationMode="server"
                 />
             </Paper>
             <DeleteDialog
