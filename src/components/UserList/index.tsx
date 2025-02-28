@@ -11,7 +11,7 @@ import { usersUrl } from '../../constants/url';
 import CreateUserComponent from '../CreateUser';
 import DeleteDialog from '../Common/Dialog/DeleteDialog';
 import { DELETE_USER } from '../../constants/messages';
-import { Stack } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 
 const paginationModel = { page: 0, pageSize: 5 };
 
@@ -24,7 +24,7 @@ const UsersComponent: React.FC = () => {
 
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', flex: 0.1},
+        { field: 'id', headerName: 'ID', flex: 0.1 },
         { field: 'firstName', headerName: 'First Name', flex: 0.2 },
         { field: 'lastName', headerName: 'Last Name', flex: 0.2 },
         { field: 'email', headerName: 'Email', flex: 0.3 },
@@ -99,6 +99,9 @@ const UsersComponent: React.FC = () => {
 
     return (
         <Stack spacing={2} sx={{ padding: 2 }}>
+            <Typography variant="h4" gutterBottom>
+                User Management
+            </Typography>
             <Stack direction="row" justifyContent="flex-end">
                 <CreateUserComponent onUserCreated={handleUserCreated} />
             </Stack>
